@@ -40,28 +40,70 @@ class _NoteHomeState extends State<NoteHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          TextField(
-            controller: _controller,
-            decoration: const InputDecoration(labelText: 'Nhập ghi chú'),
-          ),
-          ElevatedButton(onPressed: null, child: const Text("Thêm note")),
-          Expanded(
-            child: ListView.builder(
-              itemCount: notes.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(notes[index].title),
-                  trailing: IconButton(
-                    onPressed: null,
-                    icon: const Icon(Icons.delete),
+      backgroundColor: const Color(0xFFF5F5F5),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+            // Bọc toàn bộ widget để cuộn
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: _controller,
+                  decoration: const InputDecoration(
+                    labelText: 'Nhập ghi chú',
+                    border: OutlineInputBorder(),
                   ),
-                );
-              },
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      elevation: 4,
+                    ),
+                    child: const Text(
+                      "Thêm ghi chú",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: notes.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      margin: EdgeInsets.symmetric(vertical: 10),
+                      child: ListTile(
+                        title: Text(notes[index].title),
+                        trailing: IconButton(
+                          onPressed: null,
+                          icon: const Icon(Icons.delete),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 15,
+                          horizontal: 6,
+                        ),
+                        tileColor: Colors.deepPurple.shade200,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
