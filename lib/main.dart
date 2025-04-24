@@ -35,9 +35,13 @@ class NoteHome extends StatefulWidget {
 }
 
 class _NoteHomeState extends State<NoteHome> {
-  final TextEditingController _controller = TextEditingController();
-  String? _message;
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _contentController = TextEditingController();
+
   int nextId = 0;
+  bool _showForm = false;
+  String? _message;
   void _showMessage(String msg) {
     setState(() {
       _message = msg;
@@ -57,13 +61,64 @@ class _NoteHomeState extends State<NoteHome> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextField(
-                  controller: _controller,
-                  decoration: const InputDecoration(
-                    labelText: 'Nhập ghi chú',
-                    border: OutlineInputBorder(),
+                if (_showForm)
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Vui lòng nhập tiêu đề';
+                            }
+                            return null;
+                          },
+                          controller: _titleController,
+                          decoration: InputDecoration(
+                            labelText: 'Tiêu đề',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        TextFormField(
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Vui lòng nhập nội dung';
+                            }
+                            return null;
+                          },
+                          controller: _contentController,
+                          maxLines: 5,
+                          decoration: InputDecoration(
+                            labelText: 'Nội dung',
+                            border: OutlineInputBorder(),
+                            alignLabelWithHint: true,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              final newNote = Note(
+                                id: nextId + 1,
+                                title: _titleController.text,
+                                content: _contentController.text,
+                              );
+                              noteProvider.addNote(newNote);
+                              _titleController.clear();
+                              _contentController.clear();
+                              _showMessage("Thêm ghi chú thành công");
+                              nextId++;
+                              setState(() {
+                                _showForm = false; // ẩn lại form
+                              });
+                            }
+                          },
+                          child: const Text("Lưu"),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
                 const SizedBox(height: 16),
                 if (_message != null)
                   Container(
@@ -79,22 +134,16 @@ class _NoteHomeState extends State<NoteHome> {
                 Center(
                   child: ElevatedButton(
                     onPressed: () {
-                      final newNote = Note(
-                        id: nextId + 1,
-                        title: _controller.text,
-                        content: '',
-                      );
-                      noteProvider.addNote(newNote);
-                      nextId++;
-                      _controller.clear();
-                      _showMessage("Thêm ghi chú thành công");
+                      setState(() {
+                        _showForm = !_showForm;
+                      });
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurple,
                       elevation: 4,
                     ),
-                    child: const Text(
-                      "Thêm ghi chú",
+                    child: Text(
+                      _showForm ? "Đóng form" : "Thêm ghi chú",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
