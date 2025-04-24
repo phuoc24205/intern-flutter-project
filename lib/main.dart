@@ -1,4 +1,6 @@
+import 'package:app/note_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Note {
   final int id;
@@ -8,7 +10,12 @@ class Note {
 }
 
 void main() {
-  runApp(const NoteApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => NoteProvider(),
+      child: NoteApp(),
+    ),
+  );
 }
 
 class NoteApp extends StatelessWidget {
@@ -29,23 +36,24 @@ class NoteHome extends StatefulWidget {
 
 class _NoteHomeState extends State<NoteHome> {
   final TextEditingController _controller = TextEditingController();
-  int _nextId = 0;
-  final List<Note> notes = [
-    Note(id: 1, title: 'Note 1', content: 'Nội dung của note 1'),
-    Note(id: 2, title: 'Note 2', content: 'Nội dung của note 2'),
-    Note(id: 3, title: 'Note 3', content: 'Nội dung của note 3'),
-    Note(id: 4, title: 'Note 4', content: 'Nội dung của note 4'),
-  ];
+  String? _message;
+  int nextId = 0;
+  void _showMessage(String msg) {
+    setState(() {
+      _message = msg;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final noteProvider = Provider.of<NoteProvider>(context);
+    final notes = noteProvider.notes;
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: SingleChildScrollView(
-            // Bọc toàn bộ widget để cuộn
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -57,9 +65,30 @@ class _NoteHomeState extends State<NoteHome> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                if (_message != null)
+                  Container(
+                    width: double.infinity,
+                    color: Colors.greenAccent,
+                    padding: EdgeInsets.all(10),
+                    child: Text(
+                      _message!,
+                      style: TextStyle(fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 Center(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      final newNote = Note(
+                        id: nextId + 1,
+                        title: _controller.text,
+                        content: '',
+                      );
+                      noteProvider.addNote(newNote);
+                      nextId++;
+                      _controller.clear();
+                      _showMessage("Thêm ghi chú thành công");
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurple,
                       elevation: 4,
@@ -85,7 +114,10 @@ class _NoteHomeState extends State<NoteHome> {
                       child: ListTile(
                         title: Text(notes[index].title),
                         trailing: IconButton(
-                          onPressed: null,
+                          onPressed: () {
+                            noteProvider.removeNote(notes[index].id);
+                            _showMessage("Xóa ghi chú thành công");
+                          },
                           icon: const Icon(Icons.delete),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
