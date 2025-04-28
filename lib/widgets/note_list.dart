@@ -1,16 +1,18 @@
 import 'package:app/screens/note_detail.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/note.dart';
+import '../providers/note_provider.dart';
 
 class NoteList extends StatelessWidget {
-  final List<Note> notes;
   final Function(int id) onDelete;
 
-  const NoteList({Key? key, required this.notes, required this.onDelete})
-    : super(key: key);
+  const NoteList({Key? key, required this.onDelete}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final notes = Provider.of<NoteProvider>(context).notes;
+
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -21,15 +23,14 @@ class NoteList extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 10),
           child: ListTile(
             title: Text(note.title),
-            onTap:
-                () => {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => NoteDetailScreen(note: note),
-                    ),
-                  ),
-                },
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NoteDetailScreen(note: note),
+                ),
+              );
+            },
             trailing: IconButton(
               onPressed: () => onDelete(note.id),
               icon: const Icon(Icons.delete),

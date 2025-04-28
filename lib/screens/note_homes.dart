@@ -23,6 +23,14 @@ class _NoteHomeState extends State<NoteHome> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(
+      () => Provider.of<NoteProvider>(context, listen: false).loadNotes(),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     final noteProvider = Provider.of<NoteProvider>(context);
     final notes = noteProvider.notes;
@@ -83,7 +91,6 @@ class _NoteHomeState extends State<NoteHome> {
                 ),
                 const SizedBox(height: 16),
                 NoteList(
-                  notes: notes,
                   onDelete: (id) {
                     noteProvider.removeNote(id);
                     _showMessage("Xóa ghi chú thành công");
